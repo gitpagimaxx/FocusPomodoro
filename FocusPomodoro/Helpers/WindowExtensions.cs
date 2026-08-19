@@ -54,10 +54,35 @@ public static class WindowExtensions
     public static void SetAppIcon(this Window window)
     {
         ArgumentNullException.ThrowIfNull(window);
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", AppIconFileName);
-        if (File.Exists(iconPath))
+        foreach (var iconPath in GetAppIconPaths())
         {
-            window.AppWindow.SetIcon(iconPath);
+            if (File.Exists(iconPath))
+            {
+                window.AppWindow.SetIcon(iconPath);
+                return;
+            }
+        }
+    }
+
+    private static IEnumerable<string> GetAppIconPaths()
+    {
+        yield return Path.Combine(AppContext.BaseDirectory, "Assets", AppIconFileName);
+
+        string? packagePath = null;
+        try
+        {
+            packagePath = Path.Combine(
+                Windows.ApplicationModel.Package.Current.InstalledLocation.Path,
+                "Assets",
+                AppIconFileName);
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        if (!string.IsNullOrEmpty(packagePath))
+        {
+            yield return packagePath;
         }
     }
 }
