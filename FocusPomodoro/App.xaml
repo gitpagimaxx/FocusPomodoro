@@ -1,0 +1,17 @@
+<Application
+    x:Class="FocusPomodoro.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    RequestedTheme="Dark">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Color x:Key="FocusAccentColor">#E85D4C</Color>
+            <SolidColorBrush x:Key="FocusAccentBrush" Color="{StaticResource FocusAccentColor}" />
+            <SolidColorBrush x:Key="FocusMutedBrush" Color="#A1A1AA" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

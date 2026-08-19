@@ -1,0 +1,104 @@
+<Window
+    x:Class="FocusPomodoro.SettingsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Configurações">
+
+    <Grid Padding="20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            FontSize="20"
+            FontWeight="SemiBold"
+            Text="Configurações" />
+
+        <ScrollViewer
+            Grid.Row="1"
+            Margin="0,16,0,12"
+            VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12">
+                <TextBlock
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Text="Tempos" />
+
+                <NumberBox
+                    Header="Foco (minutos)"
+                    Maximum="180"
+                    Minimum="1"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Compact"
+                    Value="{x:Bind ViewModel.FocusDurationMinutes, Mode=TwoWay}" />
+                <NumberBox
+                    Header="Pausa curta (minutos)"
+                    Maximum="60"
+                    Minimum="1"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Compact"
+                    Value="{x:Bind ViewModel.ShortBreakDurationMinutes, Mode=TwoWay}" />
+                <NumberBox
+                    Header="Pausa longa (minutos)"
+                    Maximum="60"
+                    Minimum="1"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Compact"
+                    Value="{x:Bind ViewModel.LongBreakDurationMinutes, Mode=TwoWay}" />
+                <NumberBox
+                    Header="Ciclos antes da pausa longa"
+                    Maximum="20"
+                    Minimum="1"
+                    SmallChange="1"
+                    SpinButtonPlacementMode="Compact"
+                    Value="{x:Bind ViewModel.CyclesBeforeLongBreak, Mode=TwoWay}" />
+
+                <TextBlock
+                    Margin="0,8,0,0"
+                    FontSize="14"
+                    FontWeight="SemiBold"
+                    Text="Comportamento" />
+
+                <ToggleSwitch
+                    Header="Iniciar próxima fase automaticamente"
+                    IsOn="{x:Bind ViewModel.AutoStartNextPhase, Mode=TwoWay}" />
+                <ToggleSwitch
+                    Header="Sempre visível"
+                    IsOn="{x:Bind ViewModel.AlwaysOnTop, Mode=TwoWay}" />
+                <ToggleSwitch
+                    Header="Sons"
+                    IsOn="{x:Bind ViewModel.SoundEnabled, Mode=TwoWay}" />
+                <ToggleSwitch
+                    Header="Notificações"
+                    IsOn="{x:Bind ViewModel.NotificationsEnabled, Mode=TwoWay}" />
+                <ToggleSwitch
+                    Header="Tema escuro"
+                    IsOn="{x:Bind ViewModel.IsDarkTheme, Mode=TwoWay}" />
+                <ToggleSwitch
+                    Header="Minimizar para a bandeja ao fechar"
+                    IsOn="{x:Bind ViewModel.MinimizeToTrayOnClose, Mode=TwoWay}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="2">
+            <Button
+                HorizontalAlignment="Left"
+                Command="{x:Bind ViewModel.RestoreDefaultsCommand}"
+                Content="Restaurar padrões" />
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal"
+                Spacing="8">
+                <Button
+                    Command="{x:Bind ViewModel.CancelCommand}"
+                    Content="Cancelar" />
+                <Button
+                    Command="{x:Bind ViewModel.SaveCommand}"
+                    Content="Salvar"
+                    Style="{StaticResource AccentButtonStyle}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

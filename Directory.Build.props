@@ -1,0 +1,10 @@
+﻿<Project>
+  <!-- 
+    Workaround para Visual Studio 2026 - Corrige o caminho do MSVC Tools
+  -->
+  <PropertyGroup>
+    <!-- Para projetos C# WinUI 3, desabilita a detecção automática do VC Tools -->
+    <VCInstallPath32 Condition="'$(VCInstallPath32)' == ''">NOT_REQUIRED_FOR_CSHARP</VCInstallPath32>
+    <VCInstallPath64 Condition="'$(VCInstallPath64)' == ''">NOT_REQUIRED_FOR_CSHARP</VCInstallPath64>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.9.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\FocusPomodoro\Helpers\PhaseNotificationCatalog.cs" Link="Linked\PhaseNotificationCatalog.cs" />
+    <Compile Include="..\FocusPomodoro\Helpers\WindowClosePolicy.cs" Link="Linked\WindowClosePolicy.cs" />
+    <Compile Include="..\FocusPomodoro\Helpers\WindowLayout.cs" Link="Linked\WindowLayout.cs" />
+    <Compile Include="..\FocusPomodoro\Models\AppTheme.cs" Link="Linked\AppTheme.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PhaseTransition.cs" Link="Linked\PhaseTransition.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PomodoroPhase.cs" Link="Linked\PomodoroPhase.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PomodoroSettings.cs" Link="Linked\PomodoroSettings.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PomodoroSession.cs" Link="Linked\PomodoroSession.cs" />
+    <Compile Include="..\FocusPomodoro\Services\INotificationService.cs" Link="Linked\INotificationService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\ISoundService.cs" Link="Linked\ISoundService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\NotificationService.cs" Link="Linked\NotificationService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\SoundService.cs" Link="Linked\SoundService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\IUiTicker.cs" Link="Linked\IUiTicker.cs" />
+    <Compile Include="..\FocusPomodoro\Services\IPomodoroTimerService.cs" Link="Linked\IPomodoroTimerService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\ISettingsService.cs" Link="Linked\ISettingsService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\PomodoroTimerService.cs" Link="Linked\PomodoroTimerService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\SettingsService.cs" Link="Linked\SettingsService.cs" />
+    <Compile Include="..\FocusPomodoro\ViewModels\PomodoroPresentation.cs" Link="Linked\PomodoroPresentation.cs" />
+    <Compile Include="..\FocusPomodoro\ViewModels\TrayPresentation.cs" Link="Linked\TrayPresentation.cs" />
+    <Compile Include="..\FocusPomodoro\ViewModels\SettingsViewModel.cs" Link="Linked\SettingsViewModel.cs" />
+  </ItemGroup>
+</Project>
