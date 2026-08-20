@@ -2,6 +2,7 @@ using FocusPomodoro.Helpers;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
 using Windows.Graphics;
 
 namespace FocusPomodoro.Services;
@@ -12,6 +13,7 @@ public sealed class WindowService : IWindowService
 
     private readonly ISettingsService _settingsService;
     private Window? _window;
+    private UIElement? _dragHost;
     private bool _isApplyingLayout;
     private bool _boundsDirty;
     private bool _allowClose;
@@ -36,10 +38,26 @@ public sealed class WindowService : IWindowService
 
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(dragRegion);
-        window.SetResizable(true);
+        window.ApplyTransparentTitleBar();
+        window.SetResizable(false);
         window.SetMinimizable(false);
         window.SetMaximizable(false);
+        window.SetSystemTitleBarVisible(false);
         ApplyAlwaysOnTop(window, _settingsService.Current.AlwaysOnTop);
+
+        if (window.Content is FrameworkElement root)
+        {
+            _dragHost = root;
+            root.PointerPressed += OnDragPointerPressed;
+            if (root.IsLoaded)
+            {
+                ApplyLayout();
+            }
+            else
+            {
+                root.Loaded += OnRootLoaded;
+            }
+        }
 
         _persistTimer = window.DispatcherQueue.CreateTimer();
         _persistTimer.Interval = PersistDebounce;
@@ -50,17 +68,13 @@ public sealed class WindowService : IWindowService
         window.AppWindow.Closing += OnAppWindowClosing;
         window.Closed += OnWindowClosed;
         _settingsService.SettingsChanged += OnSettingsChanged;
+    }
 
-        if (window.Content is FrameworkElement root)
+    private void OnDragPointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        if (_window is not null)
         {
-            if (root.IsLoaded)
-            {
-                ApplyLayout();
-            }
-            else
-            {
-                root.Loaded += OnRootLoaded;
-            }
+            WindowDrag.TryBegin(_window, e);
         }
     }
 
@@ -141,7 +155,10 @@ public sealed class WindowService : IWindowService
 
         var settings = _settingsService.Current;
         var scale = _window.GetRasterizationScale();
-        var size = WindowLayout.ToPixelSize(settings.WindowWidth, settings.WindowHeight, scale);
+        var size = WindowLayout.ToPixelSize(
+            WindowLayout.DefaultWidthDips,
+            WindowLayout.DefaultHeightDips,
+            scale);
         var workArea = GetPrimaryWorkArea(_window.AppWindow);
         var hadSavedPosition = WindowLayout.HasPersistedPosition(
             settings.WindowPositionX,
@@ -249,11 +266,9 @@ public sealed class WindowService : IWindowService
             return false;
         }
 
-        var scale = _window.GetRasterizationScale();
-        var size = WindowLayout.ToDips(_window.AppWindow.Size.Width, _window.AppWindow.Size.Height, scale);
         var settings = _settingsService.Current;
-        var changed = settings.WindowWidth != size.Width
-            || settings.WindowHeight != size.Height
+        var changed = settings.WindowWidth != WindowLayout.DefaultWidthDips
+            || settings.WindowHeight != WindowLayout.DefaultHeightDips
             || settings.WindowPositionX != _window.AppWindow.Position.X
             || settings.WindowPositionY != _window.AppWindow.Position.Y;
 
@@ -262,8 +277,8 @@ public sealed class WindowService : IWindowService
             return false;
         }
 
-        settings.WindowWidth = size.Width;
-        settings.WindowHeight = size.Height;
+        settings.WindowWidth = WindowLayout.DefaultWidthDips;
+        settings.WindowHeight = WindowLayout.DefaultHeightDips;
         settings.WindowPositionX = _window.AppWindow.Position.X;
         settings.WindowPositionY = _window.AppWindow.Position.Y;
         _boundsDirty = true;
@@ -288,6 +303,12 @@ public sealed class WindowService : IWindowService
         _window.AppWindow.Closing -= OnAppWindowClosing;
         _window.Closed -= OnWindowClosed;
         _settingsService.SettingsChanged -= OnSettingsChanged;
+
+        if (_dragHost is not null)
+        {
+            _dragHost.PointerPressed -= OnDragPointerPressed;
+            _dragHost = null;
+        }
 
         if (_window.Content is FrameworkElement root)
         {

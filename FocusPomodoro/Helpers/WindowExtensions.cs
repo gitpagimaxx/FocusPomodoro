@@ -45,6 +45,40 @@ public static class WindowExtensions
         }
     }
 
+    public static void SetSystemTitleBarVisible(this Window window, bool visible)
+    {
+        if (window.GetOverlappedPresenter() is not { } presenter)
+        {
+            return;
+        }
+
+        presenter.SetBorderAndTitleBar(visible, visible);
+        if (visible)
+        {
+            presenter.IsMinimizable = false;
+            presenter.IsMaximizable = false;
+        }
+    }
+
+    public static void ApplyTransparentTitleBar(this Window window)
+    {
+        ArgumentNullException.ThrowIfNull(window);
+        var titleBar = window.AppWindow.TitleBar;
+        var transparent = Microsoft.UI.Colors.Transparent;
+
+        titleBar.IconShowOptions = IconShowOptions.HideIconAndSystemMenu;
+        titleBar.BackgroundColor = transparent;
+        titleBar.InactiveBackgroundColor = transparent;
+        titleBar.ButtonBackgroundColor = transparent;
+        titleBar.ButtonInactiveBackgroundColor = transparent;
+        titleBar.ButtonHoverBackgroundColor = transparent;
+        titleBar.ButtonPressedBackgroundColor = transparent;
+        titleBar.ButtonForegroundColor = transparent;
+        titleBar.ButtonInactiveForegroundColor = transparent;
+        titleBar.ButtonHoverForegroundColor = transparent;
+        titleBar.ButtonPressedForegroundColor = transparent;
+    }
+
     public static double GetRasterizationScale(this Window window)
     {
         ArgumentNullException.ThrowIfNull(window);

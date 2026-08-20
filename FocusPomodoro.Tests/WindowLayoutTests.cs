@@ -11,7 +11,7 @@ public sealed class WindowLayoutTests
         var size = WindowLayout.ToPixelSize(widthDips: 0, heightDips: 0, scale: 1.0);
 
         Assert.Equal(260, size.Width);
-        Assert.Equal(170, size.Height);
+        Assert.Equal(78, size.Height);
     }
 
     [Fact]
@@ -20,7 +20,7 @@ public sealed class WindowLayoutTests
         var size = WindowLayout.ToPixelSize(widthDips: -1, heightDips: -1, scale: 1.5);
 
         Assert.Equal(390, size.Width);
-        Assert.Equal(255, size.Height);
+        Assert.Equal(117, size.Height);
     }
 
     [Fact]
@@ -47,24 +47,24 @@ public sealed class WindowLayoutTests
     public void BottomRight_PlacesWindowAboveTaskbarWithSafeMargin()
     {
         var workArea = new PixelRect(0, 0, 1920, 1040);
-        var window = new PixelSize(260, 170);
+        var window = new PixelSize(260, 78);
 
         var position = WindowLayout.BottomRight(workArea, window);
 
         Assert.Equal(1920 - 260 - 16, position.X);
-        Assert.Equal(1040 - 170 - 16, position.Y);
+        Assert.Equal(1040 - 78 - 16, position.Y);
     }
 
     [Fact]
     public void BottomRight_UsesWorkAreaOrigin_ForSecondaryOffsetMonitor()
     {
         var workArea = new PixelRect(1920, 100, 1600, 900);
-        var window = new PixelSize(260, 170);
+        var window = new PixelSize(260, 78);
 
         var position = WindowLayout.BottomRight(workArea, window);
 
         Assert.Equal(1920 + 1600 - 260 - 16, position.X);
-        Assert.Equal(100 + 900 - 170 - 16, position.Y);
+        Assert.Equal(100 + 900 - 78 - 16, position.Y);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public sealed class WindowLayoutTests
     {
         var visible = WindowLayout.IsVisibleOn(
             new PixelPoint(1600, 800),
-            new PixelSize(260, 170),
+            new PixelSize(260, 78),
             new PixelRect(0, 0, 1920, 1040));
 
         Assert.True(visible);
@@ -95,7 +95,7 @@ public sealed class WindowLayoutTests
     {
         var visible = WindowLayout.IsVisibleOn(
             new PixelPoint(4000, 2000),
-            new PixelSize(260, 170),
+            new PixelSize(260, 78),
             new PixelRect(0, 0, 1920, 1040));
 
         Assert.False(visible);
@@ -104,9 +104,9 @@ public sealed class WindowLayoutTests
     [Fact]
     public void ToDips_ConvertsPixelsBackUsingScale()
     {
-        var dips = WindowLayout.ToDips(widthPixels: 390, heightPixels: 255, scale: 1.5);
+        var dips = WindowLayout.ToDips(widthPixels: 390, heightPixels: 117, scale: 1.5);
 
         Assert.Equal(260, dips.Width);
-        Assert.Equal(170, dips.Height);
+        Assert.Equal(78, dips.Height);
     }
 }

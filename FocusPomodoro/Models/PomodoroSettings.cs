@@ -1,3 +1,5 @@
+using FocusPomodoro.Helpers;
+
 namespace FocusPomodoro.Models;
 
 public sealed class PomodoroSettings
@@ -13,8 +15,8 @@ public sealed class PomodoroSettings
     public AppTheme AppTheme { get; set; } = AppTheme.Dark;
     public int WindowPositionX { get; set; } = -1;
     public int WindowPositionY { get; set; } = -1;
-    public int WindowWidth { get; set; } = 260;
-    public int WindowHeight { get; set; } = 150;
+    public int WindowWidth { get; set; } = WindowLayout.DefaultWidthDips;
+    public int WindowHeight { get; set; } = WindowLayout.DefaultHeightDips;
     public bool MinimizeToTrayOnClose { get; set; }
 
     public static PomodoroSettings CreateDefault() => new();

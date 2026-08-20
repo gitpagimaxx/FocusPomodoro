@@ -172,7 +172,7 @@ public sealed class SettingsServiceTests : IDisposable
         Assert.Equal(-1, settings.WindowPositionX);
         Assert.Equal(-1, settings.WindowPositionY);
         Assert.Equal(260, settings.WindowWidth);
-        Assert.Equal(170, settings.WindowHeight);
+        Assert.Equal(78, settings.WindowHeight);
         Assert.False(settings.MinimizeToTrayOnClose);
     }
 }

@@ -29,7 +29,7 @@ public sealed partial class MainWindow : Window
         SystemBackdrop = new MicaBackdrop();
         Title = ViewModel.Title;
 
-        _windowService.Initialize(this, AppTitleBar);
+        _windowService.Initialize(this, DragRegion);
 
         ViewModel.SettingsRequested += OnSettingsRequested;
         ViewModel.CloseChoiceRequested += OnCloseChoiceRequested;
@@ -38,6 +38,8 @@ public sealed partial class MainWindow : Window
 
         WindowAppearance.Apply(this, _settingsService.Current);
     }
+
+    private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
 
     private void OnSettingsRequested(object? sender, EventArgs e)
     {

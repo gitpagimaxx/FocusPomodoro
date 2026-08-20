@@ -4,51 +4,53 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="FocusPomodoro">
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="32" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid x:Name="DragRegion" />
+        <Grid Padding="10,6,10,8">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
 
-        <Grid
-            x:Name="AppTitleBar"
-            Grid.Row="0" />
-
-        <StackPanel
-            Grid.Row="1"
-            Padding="12,4,12,10"
-            Spacing="10">
-
-            <Grid>
+            <Grid Grid.Row="0">
                 <TextBlock
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    FontSize="12"
-                    FontWeight="SemiBold"
-                    Foreground="{x:Bind ViewModel.PhaseAccentBrush, Mode=OneWay}"
-                    Text="{x:Bind ViewModel.CurrentPhaseText, Mode=OneWay}" />
-                <TextBlock
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    FontSize="11"
+                    FontSize="10"
                     Foreground="{StaticResource FocusMutedBrush}"
                     Text="{x:Bind ViewModel.CycleText, Mode=OneWay}" />
-                <Button
-                    Width="22"
-                    Height="22"
-                    Padding="0"
+                <StackPanel
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Opacity="0.55"
-                    Command="{x:Bind ViewModel.OpenSettingsCommand}">
-                    <ToolTipService.ToolTip>Configurações</ToolTipService.ToolTip>
-                    <FontIcon FontSize="11" Glyph="&#xE713;" />
-                </Button>
+                    Orientation="Horizontal"
+                    Spacing="2">
+                    <Button
+                        Width="22"
+                        Height="22"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Opacity="0.55"
+                        Command="{x:Bind ViewModel.OpenSettingsCommand}">
+                        <ToolTipService.ToolTip>Configurações</ToolTipService.ToolTip>
+                        <FontIcon FontSize="11" Glyph="&#xE713;" />
+                    </Button>
+                    <Button
+                        x:Name="CloseButton"
+                        Width="22"
+                        Height="22"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Opacity="0.55"
+                        Click="OnCloseClick">
+                        <ToolTipService.ToolTip>Fechar</ToolTipService.ToolTip>
+                        <FontIcon FontSize="10" Glyph="&#xE8BB;" />
+                    </Button>
+                </StackPanel>
             </Grid>
 
-            <Grid>
+            <Grid Grid.Row="1" Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -70,15 +72,14 @@
                 </Button>
                 <TextBlock
                     Grid.Column="1"
-                    MinWidth="120"
-                    HorizontalAlignment="Right"
+                    HorizontalAlignment="Stretch"
                     VerticalAlignment="Center"
                     TextAlignment="Right"
-                    FontFamily="Segoe UI Variable Display"
-                    FontSize="30"
-                    FontWeight="Light"
+                    FontFamily="Cascadia Mono"
+                    FontSize="22"
+                    FontWeight="Medium"
                     Text="{x:Bind ViewModel.TimeRemainingText, Mode=OneWay}" />
             </Grid>
-        </StackPanel>
+        </Grid>
     </Grid>
 </Window>

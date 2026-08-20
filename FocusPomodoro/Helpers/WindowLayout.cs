@@ -9,7 +9,7 @@ public readonly record struct PixelPoint(int X, int Y);
 public static class WindowLayout
 {
     public const int DefaultWidthDips = 260;
-    public const int DefaultHeightDips = 150;
+    public const int DefaultHeightDips = 78;
     public const int SafeMarginPixels = 16;
 
     public static PixelSize ToPixelSize(int widthDips, int heightDips, double scale)

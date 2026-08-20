@@ -508,7 +508,50 @@ public sealed class PomodoroTimerServiceTests
     }
 
     [Fact]
-    public void ApplySettings_WhenRunning_DoesNotResetRemaining()
+    public void ApplySettings_WhenRunning_StopsAndResetsToNewDuration()
+    {
+        var settings = new PomodoroSettings();
+        var (service, time, ticker) = CreateSut(settings);
+        service.Start();
+        time.Advance(TimeSpan.FromSeconds(10));
+        ticker.RaiseTick();
+        settings.FocusDurationMinutes = 50;
+
+        service.ApplySettings();
+
+        var state = service.GetState();
+        Assert.Equal(TimeSpan.FromMinutes(50), state.RemainingTime);
+        Assert.Equal(TimeSpan.FromMinutes(50), state.TotalPhaseDuration);
+        Assert.False(state.IsRunning);
+        Assert.False(state.IsPaused);
+        Assert.Null(state.EndTime);
+        Assert.False(ticker.IsStarted);
+    }
+
+    [Fact]
+    public void ApplySettings_WhenPaused_StopsAndResetsToNewDuration()
+    {
+        var settings = new PomodoroSettings();
+        var (service, time, ticker) = CreateSut(settings);
+        service.Start();
+        time.Advance(TimeSpan.FromSeconds(10));
+        ticker.RaiseTick();
+        service.Pause();
+        settings.FocusDurationMinutes = 40;
+
+        service.ApplySettings();
+
+        var state = service.GetState();
+        Assert.Equal(TimeSpan.FromMinutes(40), state.RemainingTime);
+        Assert.Equal(TimeSpan.FromMinutes(40), state.TotalPhaseDuration);
+        Assert.False(state.IsRunning);
+        Assert.False(state.IsPaused);
+        Assert.Null(state.EndTime);
+        Assert.False(ticker.IsStarted);
+    }
+
+    [Fact]
+    public void ApplySettings_WhenRunning_AndCurrentDurationUnchanged_KeepsRunning()
     {
         var settings = new PomodoroSettings();
         var (service, time, ticker) = CreateSut(settings);
@@ -516,13 +559,16 @@ public sealed class PomodoroTimerServiceTests
         time.Advance(TimeSpan.FromSeconds(10));
         ticker.RaiseTick();
         var remainingBefore = service.GetState().RemainingTime;
-        settings.FocusDurationMinutes = 50;
+        settings.ShortBreakDurationMinutes = 10;
+        settings.AlwaysOnTop = true;
 
         service.ApplySettings();
 
         var state = service.GetState();
         Assert.Equal(remainingBefore, state.RemainingTime);
+        Assert.Equal(TimeSpan.FromMinutes(25), state.TotalPhaseDuration);
         Assert.True(state.IsRunning);
+        Assert.True(ticker.IsStarted);
     }
 
     [Fact]

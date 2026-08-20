@@ -114,8 +114,14 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
 
     public void ApplySettings()
     {
-        if (!_session.IsRunning && !_session.IsPaused)
+        var newDuration = DurationFor(_session.CurrentPhase);
+        if (newDuration != _session.TotalPhaseDuration)
         {
+            if (_session.IsRunning || _session.IsPaused)
+            {
+                GoIdle();
+            }
+
             ApplyPhaseDuration(_session.CurrentPhase);
         }
 
