@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="FocusPomodoro">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="#1C1C1E">
         <Grid x:Name="DragRegion" />
         <Grid Padding="10,6,10,8">
             <Grid.RowDefinitions>
@@ -13,17 +13,33 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
                 <TextBlock
-                    HorizontalAlignment="Left"
+                    Grid.Column="0"
                     VerticalAlignment="Center"
                     FontSize="10"
                     Foreground="{StaticResource FocusMutedBrush}"
                     Text="{x:Bind ViewModel.CycleText, Mode=OneWay}" />
                 <StackPanel
+                    Grid.Column="1"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Orientation="Horizontal"
                     Spacing="2">
+                    <Button
+                        Width="22"
+                        Height="22"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Opacity="0.55"
+                        Command="{x:Bind ViewModel.ResetCycleCommand}">
+                        <ToolTipService.ToolTip>Reiniciar ciclo</ToolTipService.ToolTip>
+                        <FontIcon FontSize="11" Glyph="&#xE72C;" />
+                    </Button>
                     <Button
                         Width="22"
                         Height="22"

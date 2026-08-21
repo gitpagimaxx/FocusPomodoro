@@ -20,5 +20,6 @@ internal static class WindowAppearance
 
         window.SetAlwaysOnTop(settings.AlwaysOnTop);
         window.SetAppIcon();
+        window.ApplyDarkFrame();
     }
 }

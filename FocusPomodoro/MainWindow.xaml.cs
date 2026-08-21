@@ -3,7 +3,6 @@ using FocusPomodoro.Services;
 using FocusPomodoro.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Media;
 
 namespace FocusPomodoro;
 
@@ -25,8 +24,7 @@ public sealed partial class MainWindow : Window
         _settingsService = settingsService;
         _windowService = windowService;
         InitializeComponent();
-
-        SystemBackdrop = new MicaBackdrop();
+        SystemBackdrop = null;
         Title = ViewModel.Title;
 
         _windowService.Initialize(this, DragRegion);

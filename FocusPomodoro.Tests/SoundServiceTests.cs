@@ -32,6 +32,19 @@ public sealed class SoundServiceTests
     }
 
     [Fact]
+    public void ResetCycle_DoesNotPlaySound()
+    {
+        var (timer, _, _, settings) = CreateTimer();
+        timer.SkipToNextPhase();
+        var plays = 0;
+        _ = new SoundService(timer, settings, () => plays++);
+
+        timer.ResetCycle();
+
+        Assert.Equal(0, plays);
+    }
+
+    [Fact]
     public void Pause_DoesNotPlaySound()
     {
         var (timer, time, ticker, settings) = CreateTimer();

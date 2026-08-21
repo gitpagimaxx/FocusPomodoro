@@ -28,7 +28,7 @@ public static class PomodoroPresentation
     };
 
     public static string CycleText(int currentCycle, int cyclesBeforeLongBreak) =>
-        $"Ciclo {currentCycle} de {cyclesBeforeLongBreak}";
+        $"{currentCycle}/{cyclesBeforeLongBreak}";
 
     public static string TimeRemainingText(TimeSpan remainingTime) =>
         $"{(int)remainingTime.TotalMinutes:00}:{remainingTime.Seconds:00}";

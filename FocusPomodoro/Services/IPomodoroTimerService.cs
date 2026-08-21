@@ -13,6 +13,7 @@ public interface IPomodoroTimerService
     void Pause();
     void Resume();
     void RestartCurrentPhase();
+    void ResetCycle();
     void SkipToNextPhase();
     void ApplySettings();
 }

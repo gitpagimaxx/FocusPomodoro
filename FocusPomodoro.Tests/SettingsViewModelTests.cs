@@ -163,6 +163,7 @@ public sealed class SettingsViewModelTests
         public void Pause() { }
         public void Resume() { }
         public void RestartCurrentPhase() { }
+        public void ResetCycle() { }
         public void SkipToNextPhase() { }
         public void ApplySettings() => ApplySettingsCount++;
     }

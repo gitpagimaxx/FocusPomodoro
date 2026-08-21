@@ -38,11 +38,11 @@ public sealed class WindowService : IWindowService
 
         window.ExtendsContentIntoTitleBar = true;
         window.SetTitleBar(dragRegion);
-        window.ApplyTransparentTitleBar();
         window.SetResizable(false);
         window.SetMinimizable(false);
         window.SetMaximizable(false);
         window.SetSystemTitleBarVisible(false);
+        window.ApplyTransparentTitleBar();
         ApplyAlwaysOnTop(window, _settingsService.Current.AlwaysOnTop);
 
         if (window.Content is FrameworkElement root)
@@ -67,7 +67,13 @@ public sealed class WindowService : IWindowService
         window.AppWindow.Changed += OnAppWindowChanged;
         window.AppWindow.Closing += OnAppWindowClosing;
         window.Closed += OnWindowClosed;
+        window.Activated += OnWindowActivated;
         _settingsService.SettingsChanged += OnSettingsChanged;
+    }
+
+    private void OnWindowActivated(object sender, WindowActivatedEventArgs e)
+    {
+        _window?.ApplyDarkFrame();
     }
 
     private void OnDragPointerPressed(object sender, PointerRoutedEventArgs e)
@@ -178,6 +184,11 @@ public sealed class WindowService : IWindowService
         {
             _isApplyingLayout = false;
         }
+
+        _window.ApplyDarkFrame();
+        _window.DispatcherQueue.TryEnqueue(
+            DispatcherQueuePriority.Low,
+            () => _window?.ApplyDarkFrame());
 
         if (TryCaptureBounds() && !hadSavedPosition)
         {
@@ -302,6 +313,7 @@ public sealed class WindowService : IWindowService
         _window.AppWindow.Changed -= OnAppWindowChanged;
         _window.AppWindow.Closing -= OnAppWindowClosing;
         _window.Closed -= OnWindowClosed;
+        _window.Activated -= OnWindowActivated;
         _settingsService.SettingsChanged -= OnSettingsChanged;
 
         if (_dragHost is not null)

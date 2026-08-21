@@ -102,6 +102,22 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
         RaiseStateChanged();
     }
 
+    public void ResetCycle()
+    {
+        var previousPhase = _session.CurrentPhase;
+        GoIdle();
+        _session.CurrentPhase = PomodoroPhase.Focus;
+        _session.CurrentCycle = 1;
+        ApplyPhaseDuration(PomodoroPhase.Focus);
+
+        if (previousPhase != PomodoroPhase.Focus)
+        {
+            RaisePhaseChanged();
+        }
+
+        RaiseStateChanged();
+    }
+
     public void SkipToNextPhase()
     {
         var completed = _session.CurrentPhase;

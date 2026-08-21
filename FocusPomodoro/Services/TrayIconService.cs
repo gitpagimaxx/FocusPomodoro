@@ -17,6 +17,7 @@ public sealed class TrayIconService : ITrayIconService
     public event EventHandler? ShowRequested;
     public event EventHandler? TimerActionRequested;
     public event EventHandler? RestartRequested;
+    public event EventHandler? ResetCycleRequested;
     public event EventHandler? ExitRequested;
 
     public void Initialize()
@@ -31,6 +32,7 @@ public sealed class TrayIconService : ITrayIconService
         _timerItem = CreateItem("Iniciar", () => TimerActionRequested?.Invoke(this, EventArgs.Empty));
         _restartItem = CreateItem("Reiniciar período", () => RestartRequested?.Invoke(this, EventArgs.Empty));
         _restartItem.IsEnabled = false;
+        var resetCycleItem = CreateItem("Reiniciar ciclo", () => ResetCycleRequested?.Invoke(this, EventArgs.Empty));
         var exitItem = CreateItem("Sair completamente", () => ExitRequested?.Invoke(this, EventArgs.Empty));
 
         var menu = new MenuFlyout();
@@ -38,6 +40,7 @@ public sealed class TrayIconService : ITrayIconService
         menu.Items.Add(new MenuFlyoutSeparator());
         menu.Items.Add(_timerItem);
         menu.Items.Add(_restartItem);
+        menu.Items.Add(resetCycleItem);
         menu.Items.Add(new MenuFlyoutSeparator());
         menu.Items.Add(exitItem);
 

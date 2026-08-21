@@ -86,6 +86,21 @@ public sealed class NotificationServiceTests
     }
 
     [Fact]
+    public void ResetCycle_DoesNotShowToast()
+    {
+        var (timer, _, _, settings) = CreateTimer();
+        timer.SkipToNextPhase();
+        var toasts = new List<(string Title, string Message)>();
+        _ = new NotificationService(timer, settings, (title, message) => toasts.Add((title, message)));
+
+        timer.ResetCycle();
+
+        Assert.Empty(toasts);
+        Assert.Equal(PomodoroPhase.Focus, timer.GetState().CurrentPhase);
+        Assert.Equal(1, timer.GetState().CurrentCycle);
+    }
+
+    [Fact]
     public void Pause_DoesNotShowToast()
     {
         var (timer, time, ticker, settings) = CreateTimer();

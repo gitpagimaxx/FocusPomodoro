@@ -5,6 +5,7 @@ public interface ITrayIconService : IDisposable
     event EventHandler? ShowRequested;
     event EventHandler? TimerActionRequested;
     event EventHandler? RestartRequested;
+    event EventHandler? ResetCycleRequested;
     event EventHandler? ExitRequested;
 
     void Initialize();

@@ -84,9 +84,9 @@ public sealed class PomodoroPresentationTests
     [Fact]
     public void CycleText_FormatsCurrentCycleAndCyclesBeforeLongBreak()
     {
-        Assert.Equal("Ciclo 1 de 4", PomodoroPresentation.CycleText(1, 4));
-        Assert.Equal("Ciclo 3 de 4", PomodoroPresentation.CycleText(3, 4));
-        Assert.Equal("Ciclo 2 de 6", PomodoroPresentation.CycleText(2, 6));
+        Assert.Equal("1/4", PomodoroPresentation.CycleText(1, 4));
+        Assert.Equal("3/4", PomodoroPresentation.CycleText(3, 4));
+        Assert.Equal("2/6", PomodoroPresentation.CycleText(2, 6));
     }
 
     [Theory]

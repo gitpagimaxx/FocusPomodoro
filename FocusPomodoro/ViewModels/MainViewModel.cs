@@ -38,6 +38,7 @@ public partial class MainViewModel : ObservableObject
         _trayIcon.ShowRequested += OnTrayShowRequested;
         _trayIcon.TimerActionRequested += OnTrayTimerActionRequested;
         _trayIcon.RestartRequested += OnTrayRestartRequested;
+        _trayIcon.ResetCycleRequested += OnTrayResetCycleRequested;
         _trayIcon.ExitRequested += OnTrayExitRequested;
         ApplyState(_timer.GetState());
     }
@@ -65,7 +66,7 @@ public partial class MainViewModel : ObservableObject
     public partial string TimeRemainingText { get; set; } = "25:00";
 
     [ObservableProperty]
-    public partial string CycleText { get; set; } = "Ciclo 1 de 4";
+    public partial string CycleText { get; set; } = "1/4";
 
     [ObservableProperty]
     public partial double ProgressPercentage { get; set; }
@@ -169,6 +170,9 @@ public partial class MainViewModel : ObservableObject
         RestartCommand.NotifyCanExecuteChanged();
     }
 
+    [RelayCommand]
+    private void ResetCycle() => _timer.ResetCycle();
+
     [RelayCommand(CanExecute = nameof(CanSkip))]
     private void Skip() => _timer.SkipToNextPhase();
 
@@ -200,6 +204,8 @@ public partial class MainViewModel : ObservableObject
             Restart();
         }
     }
+
+    private void OnTrayResetCycleRequested(object? sender, EventArgs e) => ResetCycle();
 
     private void OnTrayExitRequested(object? sender, EventArgs e) => _ = ExitCoreAsync();
 

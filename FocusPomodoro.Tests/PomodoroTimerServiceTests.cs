@@ -369,6 +369,59 @@ public sealed class PomodoroTimerServiceTests
     }
 
     [Fact]
+    public void ResetCycle_ReturnsToIdleFocusCycleOneWithFullDuration()
+    {
+        var (service, time, ticker) = CreateSut();
+        CompleteFocusCyclesUntil(service, time, ticker, focusCycleToComplete: 2);
+        service.Start();
+        time.Advance(TimeSpan.FromSeconds(10));
+        ticker.RaiseTick();
+
+        service.ResetCycle();
+
+        var state = service.GetState();
+        Assert.Equal(PomodoroPhase.Focus, state.CurrentPhase);
+        Assert.Equal(1, state.CurrentCycle);
+        Assert.False(state.IsRunning);
+        Assert.False(state.IsPaused);
+        Assert.Null(state.EndTime);
+        Assert.Equal(TimeSpan.FromMinutes(25), state.RemainingTime);
+        Assert.Equal(TimeSpan.FromMinutes(25), state.TotalPhaseDuration);
+        Assert.False(ticker.IsStarted);
+    }
+
+    [Fact]
+    public void ResetCycle_DoesNotRaisePhaseTransitioned()
+    {
+        var (service, _, _) = CreateSut();
+        service.SkipToNextPhase();
+        var events = new RaisedEvents(service);
+
+        service.ResetCycle();
+
+        Assert.Empty(events.PhaseTransitions);
+        Assert.Equal(new[] { PomodoroPhase.Focus }, events.PhaseChanges);
+        Assert.True(events.StateChangedCount >= 1);
+    }
+
+    [Fact]
+    public void ResetCycle_WhenAlreadyFocus_DoesNotRaisePhaseChanged()
+    {
+        var (service, time, ticker) = CreateSut();
+        CompleteFocusCyclesUntil(service, time, ticker, focusCycleToComplete: 1);
+        service.SkipToNextPhase();
+        Assert.Equal(PomodoroPhase.Focus, service.GetState().CurrentPhase);
+        Assert.Equal(2, service.GetState().CurrentCycle);
+        var events = new RaisedEvents(service);
+
+        service.ResetCycle();
+
+        Assert.Empty(events.PhaseChanges);
+        Assert.Empty(events.PhaseTransitions);
+        Assert.Equal(1, service.GetState().CurrentCycle);
+    }
+
+    [Fact]
     public void SkipToNextPhase_WhenAutoStartEnabled_PhaseChangedHandlerSeesRunningNewPhase()
     {
         var (service, time, _) = CreateSut();
