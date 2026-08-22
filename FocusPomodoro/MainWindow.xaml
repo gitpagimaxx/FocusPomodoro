@@ -47,6 +47,17 @@
                         Background="Transparent"
                         BorderThickness="0"
                         Opacity="0.55"
+                        Command="{x:Bind ViewModel.ToggleHistoryCommand}">
+                        <ToolTipService.ToolTip>Histórico</ToolTipService.ToolTip>
+                        <FontIcon FontSize="11" Glyph="&#xE81C;" />
+                    </Button>
+                    <Button
+                        Width="22"
+                        Height="22"
+                        Padding="0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Opacity="0.55"
                         Command="{x:Bind ViewModel.OpenSettingsCommand}">
                         <ToolTipService.ToolTip>Configurações</ToolTipService.ToolTip>
                         <FontIcon FontSize="11" Glyph="&#xE713;" />

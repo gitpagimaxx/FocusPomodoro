@@ -15,6 +15,7 @@ public partial class MainViewModel : ObservableObject
     private readonly IWindowService _windowService;
     private readonly ITrayIconService _trayIcon;
     private readonly IUiTicker _ticker;
+    private readonly ISessionHistoryService _history;
     private bool _isExiting;
     private bool _isHandlingClose;
     private byte _accentR = 0xE8;
@@ -26,13 +27,15 @@ public partial class MainViewModel : ObservableObject
         PomodoroSettings settings,
         IWindowService windowService,
         ITrayIconService trayIcon,
-        IUiTicker ticker)
+        IUiTicker ticker,
+        ISessionHistoryService history)
     {
         _timer = timer;
         _settings = settings;
         _windowService = windowService;
         _trayIcon = trayIcon;
         _ticker = ticker;
+        _history = history;
         _timer.StateChanged += OnStateChanged;
         _windowService.CloseRequested += OnWindowCloseRequested;
         _trayIcon.ShowRequested += OnTrayShowRequested;
@@ -45,7 +48,11 @@ public partial class MainViewModel : ObservableObject
 
     public event EventHandler? SettingsRequested;
 
+    public event EventHandler? HistoryRequested;
+
     public event Func<Task<WindowCloseChoice>>? CloseChoiceRequested;
+
+    public event Func<string, Task<ContinueChoice>>? ContinueChoiceRequested;
 
     public void RefreshTray()
     {
@@ -98,6 +105,30 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenSettings() => SettingsRequested?.Invoke(this, EventArgs.Empty);
+
+    [RelayCommand]
+    private void ToggleHistory() => HistoryRequested?.Invoke(this, EventArgs.Empty);
+
+    public async Task OfferResumeIfNeededAsync()
+    {
+        if (!_history.TryGetResumable(out var snapshot))
+        {
+            return;
+        }
+
+        var prompt = HistoryPresentation.ContinuePrompt(snapshot.Remaining);
+        var choice = ContinueChoiceRequested is null
+            ? ContinueChoice.Continue
+            : await ContinueChoiceRequested.Invoke(prompt);
+        if (choice == ContinueChoice.Continue)
+        {
+            _timer.Restore(snapshot.ToSession());
+            return;
+        }
+
+        await _history.StartFreshAsync();
+        _timer.ResetCycle();
+    }
 
     private void HideToTray() => _windowService.Hide();
 
@@ -263,6 +294,14 @@ public partial class MainViewModel : ObservableObject
         }
 
         _isExiting = true;
+        try
+        {
+            await _history.PersistAsync();
+        }
+        catch (Exception)
+        {
+        }
+
         PhaseSoundPlayer.Dispose();
         _trayIcon.Dispose();
         _ticker.Stop();

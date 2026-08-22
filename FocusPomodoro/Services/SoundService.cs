@@ -41,6 +41,13 @@ public sealed class SoundService : ISoundService
         _playSound();
     }
 
-    private void OnPhaseTransitioned(object? sender, PhaseTransition transition) =>
+    private void OnPhaseTransitioned(object? sender, PhaseTransition transition)
+    {
+        if (transition.Reason == PhaseEndReason.Interrupted)
+        {
+            return;
+        }
+
         PlayPhaseChange();
+    }
 }

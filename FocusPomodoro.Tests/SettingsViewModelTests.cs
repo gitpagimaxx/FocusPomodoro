@@ -158,6 +158,12 @@ public sealed class SettingsViewModelTests
             remove { }
         }
 
+        public event EventHandler? Checkpoint
+        {
+            add { }
+            remove { }
+        }
+
         public PomodoroSession GetState() => new();
         public void Start() { }
         public void Pause() { }
@@ -166,5 +172,6 @@ public sealed class SettingsViewModelTests
         public void ResetCycle() { }
         public void SkipToNextPhase() { }
         public void ApplySettings() => ApplySettingsCount++;
+        public void Restore(PomodoroSession state) { }
     }
 }

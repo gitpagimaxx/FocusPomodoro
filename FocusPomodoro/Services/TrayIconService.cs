@@ -1,13 +1,14 @@
+using System.Drawing;
 using H.NotifyIcon;
 using H.NotifyIcon.Core;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
 
 namespace FocusPomodoro.Services;
 
 public sealed class TrayIconService : ITrayIconService
 {
-    private const string IconUri = "ms-appx:///Assets/Tomato.png";
+    private const string IconFileName = "AppIcon.ico";
+    private static readonly Guid TrayId = new("8f3c1d6a-2b47-4e9f-9a61-4c7e0f2d8b15");
 
     private TaskbarIcon? _icon;
     private MenuFlyoutItem? _timerItem;
@@ -46,8 +47,9 @@ public sealed class TrayIconService : ITrayIconService
 
         _icon = new TaskbarIcon
         {
+            Id = TrayId,
             ToolTipText = "FocusPomodoro",
-            IconSource = new BitmapImage(new Uri(IconUri)),
+            Icon = LoadIcon(),
             ContextFlyout = menu,
             MenuActivation = PopupActivationMode.RightClick,
             LeftClickCommand = new RelayCommand(() => ShowRequested?.Invoke(this, EventArgs.Empty)),
@@ -88,6 +90,49 @@ public sealed class TrayIconService : ITrayIconService
         _icon = null;
         _timerItem = null;
         _restartItem = null;
+    }
+
+    private static Icon LoadIcon()
+    {
+        var path = ResolveIconPath()
+            ?? throw new FileNotFoundException("Ícone da bandeja não encontrado.", IconFileName);
+
+        return new Icon(path, 32, 32);
+    }
+
+    private static string? ResolveIconPath()
+    {
+        foreach (var path in GetIconPaths())
+        {
+            if (File.Exists(path))
+            {
+                return path;
+            }
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> GetIconPaths()
+    {
+        yield return Path.Combine(AppContext.BaseDirectory, "Assets", IconFileName);
+
+        string? packagePath = null;
+        try
+        {
+            packagePath = Path.Combine(
+                Windows.ApplicationModel.Package.Current.InstalledLocation.Path,
+                "Assets",
+                IconFileName);
+        }
+        catch (InvalidOperationException)
+        {
+        }
+
+        if (!string.IsNullOrEmpty(packagePath))
+        {
+            yield return packagePath;
+        }
     }
 
     private static MenuFlyoutItem CreateItem(string text, Action action)

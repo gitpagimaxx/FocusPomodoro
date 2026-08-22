@@ -33,6 +33,9 @@ _pkginfo.txt
 **/[Pp]ackages/*
 !**/[Pp]ackages/build/
 
+## Brainstorm companion
+.superpowers/
+
 ## OS
 Thumbs.db
 Desktop.ini

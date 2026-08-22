@@ -1,3 +1,4 @@
+using FocusPomodoro.Helpers;
 using FocusPomodoro.Models;
 
 namespace FocusPomodoro.Services;
@@ -12,6 +13,7 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
     public event EventHandler? StateChanged;
     public event EventHandler<PomodoroPhase>? PhaseChanged;
     public event EventHandler<PhaseTransition>? PhaseTransitioned;
+    public event EventHandler? Checkpoint;
 
     public PomodoroTimerService(
         PomodoroSettings settings,
@@ -52,6 +54,7 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
         }
 
         BeginRunning();
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
@@ -75,6 +78,7 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
             return;
         }
 
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
@@ -87,44 +91,79 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
         }
 
         BeginRunning();
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
     public void RestartCurrentPhase()
     {
-        var duration = DurationFor(_session.CurrentPhase);
+        var wasActive = _session.IsRunning || _session.IsPaused;
+        var phase = _session.CurrentPhase;
+        if (_session.IsRunning)
+        {
+            FreezeRemaining();
+        }
+
+        var elapsed = PhaseElapsed.FromRemaining(_session.TotalPhaseDuration, _session.RemainingTime);
+        var duration = DurationFor(phase);
         _session.RemainingTime = duration;
         _session.TotalPhaseDuration = duration;
         _session.EndTime = _session.IsRunning
             ? _timeProvider.GetUtcNow() + duration
             : null;
 
+        if (wasActive)
+        {
+            RaisePhaseTransitioned(phase, PhaseEndReason.Interrupted, elapsed);
+        }
+
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
     public void ResetCycle()
     {
-        var previousPhase = _session.CurrentPhase;
+        var wasActive = _session.IsRunning || _session.IsPaused;
+        if (_session.IsRunning)
+        {
+            FreezeRemaining();
+        }
+
+        var elapsed = PhaseElapsed.FromRemaining(_session.TotalPhaseDuration, _session.RemainingTime);
+        var completed = _session.CurrentPhase;
         GoIdle();
         _session.CurrentPhase = PomodoroPhase.Focus;
         _session.CurrentCycle = 1;
         ApplyPhaseDuration(PomodoroPhase.Focus);
 
-        if (previousPhase != PomodoroPhase.Focus)
+        if (completed != PomodoroPhase.Focus)
         {
             RaisePhaseChanged();
         }
 
+        if (wasActive)
+        {
+            RaisePhaseTransitioned(completed, PhaseEndReason.Interrupted, elapsed);
+        }
+
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
     public void SkipToNextPhase()
     {
+        if (_session.IsRunning)
+        {
+            FreezeRemaining();
+        }
+
         var completed = _session.CurrentPhase;
+        var elapsed = PhaseElapsed.FromRemaining(_session.TotalPhaseDuration, _session.RemainingTime);
         AdvanceToNextPhase();
         StartOrIdleAfterPhaseChange();
-        RaisePhaseTransitioned(completed);
+        RaisePhaseTransitioned(completed, PhaseEndReason.Skipped, elapsed);
         RaisePhaseChanged();
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
@@ -139,6 +178,31 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
             }
 
             ApplyPhaseDuration(_session.CurrentPhase);
+        }
+
+        RaiseStateChanged();
+    }
+
+    public void Restore(PomodoroSession state)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+
+        _session.CurrentPhase = state.CurrentPhase;
+        _session.CurrentCycle = state.CurrentCycle;
+        _session.RemainingTime = state.RemainingTime < TimeSpan.Zero ? TimeSpan.Zero : state.RemainingTime;
+        _session.TotalPhaseDuration = state.TotalPhaseDuration;
+        _session.IsRunning = false;
+        _session.IsPaused = false;
+        _session.EndTime = null;
+        _ticker.Stop();
+
+        if (state.IsRunning)
+        {
+            BeginRunning();
+        }
+        else if (state.IsPaused)
+        {
+            _session.IsPaused = true;
         }
 
         RaiseStateChanged();
@@ -164,10 +228,12 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
     private void CompleteCurrentPhase()
     {
         var completed = _session.CurrentPhase;
+        var elapsed = PhaseElapsed.FromRemaining(_session.TotalPhaseDuration, _session.RemainingTime);
         AdvanceToNextPhase();
         StartOrIdleAfterPhaseChange();
-        RaisePhaseTransitioned(completed);
+        RaisePhaseTransitioned(completed, PhaseEndReason.Completed, elapsed);
         RaisePhaseChanged();
+        RaiseCheckpoint();
         RaiseStateChanged();
     }
 
@@ -257,8 +323,10 @@ public sealed class PomodoroTimerService : IPomodoroTimerService
 
     private void RaisePhaseChanged() => PhaseChanged?.Invoke(this, _session.CurrentPhase);
 
-    private void RaisePhaseTransitioned(PomodoroPhase completed) =>
+    private void RaisePhaseTransitioned(PomodoroPhase completed, PhaseEndReason reason, TimeSpan elapsed) =>
         PhaseTransitioned?.Invoke(
             this,
-            new PhaseTransition(completed, _session.CurrentPhase, _session.CurrentCycle));
+            new PhaseTransition(completed, _session.CurrentPhase, _session.CurrentCycle, reason, elapsed));
+
+    private void RaiseCheckpoint() => Checkpoint?.Invoke(this, EventArgs.Empty);
 }

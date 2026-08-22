@@ -1,0 +1,36 @@
+<Window
+    x:Class="FocusPomodoro.ContinueChoiceWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="FocusPomodoro">
+
+    <Grid Padding="20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            FontSize="18"
+            FontWeight="SemiBold"
+            Text="Retomar sessão" />
+        <TextBlock
+            x:Name="PromptText"
+            Grid.Row="1"
+            Margin="0,8,0,16"
+            TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="2" Spacing="8">
+            <Button
+                HorizontalAlignment="Stretch"
+                Click="OnContinueClick"
+                Content="Continuar"
+                Style="{StaticResource AccentButtonStyle}" />
+            <Button
+                HorizontalAlignment="Stretch"
+                Click="OnStartFreshClick"
+                Content="Começar de novo" />
+        </StackPanel>
+    </Grid>
+</Window>

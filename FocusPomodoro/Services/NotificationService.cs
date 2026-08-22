@@ -48,6 +48,13 @@ public sealed class NotificationService : INotificationService
         _showToast(PhaseNotificationCatalog.Title, message);
     }
 
-    private void OnPhaseTransitioned(object? sender, PhaseTransition transition) =>
+    private void OnPhaseTransitioned(object? sender, PhaseTransition transition)
+    {
+        if (transition.Reason == PhaseEndReason.Interrupted)
+        {
+            return;
+        }
+
         NotifyPhaseCompleted(transition);
+    }
 }

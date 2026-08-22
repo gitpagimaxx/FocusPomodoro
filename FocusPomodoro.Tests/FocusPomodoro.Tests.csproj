@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.9" />
     <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.9.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.9.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
@@ -16,14 +17,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\FocusPomodoro\Helpers\HistoryPresentation.cs" Link="Linked\HistoryPresentation.cs" />
+    <Compile Include="..\FocusPomodoro\Helpers\DailyHistory.cs" Link="Linked\DailyHistory.cs" />
+    <Compile Include="..\FocusPomodoro\Helpers\HistoryPanelLayout.cs" Link="Linked\HistoryPanelLayout.cs" />
+    <Compile Include="..\FocusPomodoro\Helpers\PhaseElapsed.cs" Link="Linked\PhaseElapsed.cs" />
     <Compile Include="..\FocusPomodoro\Helpers\PhaseNotificationCatalog.cs" Link="Linked\PhaseNotificationCatalog.cs" />
     <Compile Include="..\FocusPomodoro\Helpers\WindowClosePolicy.cs" Link="Linked\WindowClosePolicy.cs" />
     <Compile Include="..\FocusPomodoro\Helpers\WindowLayout.cs" Link="Linked\WindowLayout.cs" />
     <Compile Include="..\FocusPomodoro\Models\AppTheme.cs" Link="Linked\AppTheme.cs" />
+    <Compile Include="..\FocusPomodoro\Models\ContinueChoice.cs" Link="Linked\ContinueChoice.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PhaseEndReason.cs" Link="Linked\PhaseEndReason.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PhaseLog.cs" Link="Linked\PhaseLog.cs" />
+    <Compile Include="..\FocusPomodoro\Models\PhaseOutcome.cs" Link="Linked\PhaseOutcome.cs" />
     <Compile Include="..\FocusPomodoro\Models\PhaseTransition.cs" Link="Linked\PhaseTransition.cs" />
     <Compile Include="..\FocusPomodoro\Models\PomodoroPhase.cs" Link="Linked\PomodoroPhase.cs" />
+    <Compile Include="..\FocusPomodoro\Models\SessionSnapshot.cs" Link="Linked\SessionSnapshot.cs" />
     <Compile Include="..\FocusPomodoro\Models\PomodoroSettings.cs" Link="Linked\PomodoroSettings.cs" />
     <Compile Include="..\FocusPomodoro\Models\PomodoroSession.cs" Link="Linked\PomodoroSession.cs" />
+    <Compile Include="..\FocusPomodoro\Services\ISessionHistoryService.cs" Link="Linked\ISessionHistoryService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\SessionHistoryService.cs" Link="Linked\SessionHistoryService.cs" />
+    <Compile Include="..\FocusPomodoro\Services\IHistoryStore.cs" Link="Linked\IHistoryStore.cs" />
+    <Compile Include="..\FocusPomodoro\Services\SqliteHistoryStore.cs" Link="Linked\SqliteHistoryStore.cs" />
     <Compile Include="..\FocusPomodoro\Services\INotificationService.cs" Link="Linked\INotificationService.cs" />
     <Compile Include="..\FocusPomodoro\Services\ISoundService.cs" Link="Linked\ISoundService.cs" />
     <Compile Include="..\FocusPomodoro\Services\NotificationService.cs" Link="Linked\NotificationService.cs" />
@@ -33,6 +47,7 @@
     <Compile Include="..\FocusPomodoro\Services\ISettingsService.cs" Link="Linked\ISettingsService.cs" />
     <Compile Include="..\FocusPomodoro\Services\PomodoroTimerService.cs" Link="Linked\PomodoroTimerService.cs" />
     <Compile Include="..\FocusPomodoro\Services\SettingsService.cs" Link="Linked\SettingsService.cs" />
+    <Compile Include="..\FocusPomodoro\ViewModels\HistoryViewModel.cs" Link="Linked\HistoryViewModel.cs" />
     <Compile Include="..\FocusPomodoro\ViewModels\PomodoroPresentation.cs" Link="Linked\PomodoroPresentation.cs" />
     <Compile Include="..\FocusPomodoro\ViewModels\TrayPresentation.cs" Link="Linked\TrayPresentation.cs" />
     <Compile Include="..\FocusPomodoro\ViewModels\SettingsViewModel.cs" Link="Linked\SettingsViewModel.cs" />

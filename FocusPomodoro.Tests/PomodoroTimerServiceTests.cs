@@ -391,7 +391,7 @@ public sealed class PomodoroTimerServiceTests
     }
 
     [Fact]
-    public void ResetCycle_DoesNotRaisePhaseTransitioned()
+    public void ResetCycle_WhenActive_RaisesInterruptedAndReturnsToFocus()
     {
         var (service, _, _) = CreateSut();
         service.SkipToNextPhase();
@@ -399,9 +399,13 @@ public sealed class PomodoroTimerServiceTests
 
         service.ResetCycle();
 
-        Assert.Empty(events.PhaseTransitions);
+        Assert.Single(events.PhaseTransitions);
+        Assert.Equal(PhaseEndReason.Interrupted, events.PhaseTransitions[0].Reason);
+        Assert.Equal(PomodoroPhase.ShortBreak, events.PhaseTransitions[0].CompletedPhase);
+        Assert.Equal(PomodoroPhase.Focus, events.PhaseTransitions[0].NextPhase);
         Assert.Equal(new[] { PomodoroPhase.Focus }, events.PhaseChanges);
         Assert.True(events.StateChangedCount >= 1);
+        Assert.True(events.CheckpointCount >= 1);
     }
 
     [Fact]
@@ -417,8 +421,21 @@ public sealed class PomodoroTimerServiceTests
         service.ResetCycle();
 
         Assert.Empty(events.PhaseChanges);
-        Assert.Empty(events.PhaseTransitions);
+        Assert.Single(events.PhaseTransitions);
+        Assert.Equal(PhaseEndReason.Interrupted, events.PhaseTransitions[0].Reason);
         Assert.Equal(1, service.GetState().CurrentCycle);
+    }
+
+    [Fact]
+    public void ResetCycle_WhenIdle_DoesNotRaisePhaseTransitioned()
+    {
+        var (service, _, _) = CreateSut();
+        var events = new RaisedEvents(service);
+
+        service.ResetCycle();
+
+        Assert.Empty(events.PhaseTransitions);
+        Assert.True(events.CheckpointCount >= 1);
     }
 
     [Fact]
@@ -635,6 +652,134 @@ public sealed class PomodoroTimerServiceTests
         Assert.Equal(1, events.StateChangedCount);
     }
 
+    [Fact]
+    public void CompletingPhase_RaisesPhaseTransitionedWithCompletedReason()
+    {
+        var (service, time, ticker) = CreateSut();
+        service.Start();
+        var events = new RaisedEvents(service);
+
+        time.Advance(TimeSpan.FromMinutes(25));
+        ticker.RaiseTick();
+
+        Assert.Single(events.PhaseTransitions);
+        Assert.Equal(PhaseEndReason.Completed, events.PhaseTransitions[0].Reason);
+        Assert.True(events.CheckpointCount >= 1);
+    }
+
+    [Fact]
+    public void SkipToNextPhase_AfterTenSeconds_ReportsElapsedOnTransition()
+    {
+        var (service, time, ticker) = CreateSut();
+        service.Start();
+        time.Advance(TimeSpan.FromSeconds(10));
+        ticker.RaiseTick();
+        var events = new RaisedEvents(service);
+
+        service.SkipToNextPhase();
+
+        Assert.Equal(TimeSpan.FromSeconds(10), events.PhaseTransitions[0].Elapsed);
+        Assert.Equal(PhaseEndReason.Skipped, events.PhaseTransitions[0].Reason);
+    }
+
+    [Fact]
+    public void SkipToNextPhase_RaisesPhaseTransitionedWithSkippedReason()
+    {
+        var (service, _, _) = CreateSut();
+        var events = new RaisedEvents(service);
+
+        service.SkipToNextPhase();
+
+        Assert.Single(events.PhaseTransitions);
+        Assert.Equal(PhaseEndReason.Skipped, events.PhaseTransitions[0].Reason);
+        Assert.True(events.CheckpointCount >= 1);
+    }
+
+    [Fact]
+    public void RestartCurrentPhase_WhenRunning_RaisesInterruptedAndKeepsRunning()
+    {
+        var (service, _, _) = CreateSut();
+        service.Start();
+        var events = new RaisedEvents(service);
+
+        service.RestartCurrentPhase();
+
+        Assert.Single(events.PhaseTransitions);
+        Assert.Equal(PhaseEndReason.Interrupted, events.PhaseTransitions[0].Reason);
+        Assert.Equal(PomodoroPhase.Focus, events.PhaseTransitions[0].CompletedPhase);
+        Assert.Equal(PomodoroPhase.Focus, events.PhaseTransitions[0].NextPhase);
+        Assert.True(service.GetState().IsRunning);
+        Assert.True(events.CheckpointCount >= 1);
+    }
+
+    [Fact]
+    public void RestartCurrentPhase_WhenIdle_DoesNotRaisePhaseTransitioned()
+    {
+        var (service, _, _) = CreateSut();
+        var events = new RaisedEvents(service);
+
+        service.RestartCurrentPhase();
+
+        Assert.Empty(events.PhaseTransitions);
+        Assert.True(events.CheckpointCount >= 1);
+    }
+
+    [Fact]
+    public void Start_RaisesCheckpoint_TickDoesNot()
+    {
+        var (service, time, ticker) = CreateSut();
+        var events = new RaisedEvents(service);
+
+        service.Start();
+        Assert.Equal(1, events.CheckpointCount);
+
+        time.Advance(TimeSpan.FromSeconds(1));
+        ticker.RaiseTick();
+
+        Assert.Equal(1, events.CheckpointCount);
+    }
+
+    [Fact]
+    public void Pause_AndResume_RaiseCheckpoint()
+    {
+        var (service, _, _) = CreateSut();
+        service.Start();
+        var events = new RaisedEvents(service);
+
+        service.Pause();
+        service.Resume();
+
+        Assert.Equal(2, events.CheckpointCount);
+        Assert.Empty(events.PhaseTransitions);
+    }
+
+    [Fact]
+    public void Restore_WhenWasRunning_SetsEndTimeFromNowPlusRemaining()
+    {
+        var (service, time, ticker) = CreateSut();
+        var snapshot = new PomodoroSession
+        {
+            CurrentPhase = PomodoroPhase.Focus,
+            CurrentCycle = 2,
+            IsRunning = true,
+            IsPaused = false,
+            RemainingTime = TimeSpan.FromMinutes(12),
+            TotalPhaseDuration = TimeSpan.FromMinutes(25)
+        };
+
+        time.Advance(TimeSpan.FromMinutes(5));
+        service.Restore(snapshot);
+
+        var state = service.GetState();
+        Assert.Equal(PomodoroPhase.Focus, state.CurrentPhase);
+        Assert.Equal(2, state.CurrentCycle);
+        Assert.True(state.IsRunning);
+        Assert.Equal(TimeSpan.FromMinutes(12), state.RemainingTime);
+        Assert.Equal(TimeSpan.FromMinutes(25), state.TotalPhaseDuration);
+        Assert.Equal(time.GetUtcNow() + TimeSpan.FromMinutes(12), state.EndTime);
+        Assert.True(ticker.IsStarted);
+    }
+
     private static void CompleteFocusCyclesUntil(
         PomodoroTimerService service,
         FakeTimeProvider time,
@@ -666,11 +811,14 @@ public sealed class PomodoroTimerServiceTests
         public List<PomodoroPhase> PhaseChanges { get; } = [];
         public List<PhaseTransition> PhaseTransitions { get; } = [];
 
+        public int CheckpointCount { get; private set; }
+
         public RaisedEvents(PomodoroTimerService service)
         {
             service.StateChanged += (_, _) => StateChangedCount++;
             service.PhaseChanged += (_, phase) => PhaseChanges.Add(phase);
             service.PhaseTransitioned += (_, transition) => PhaseTransitions.Add(transition);
+            service.Checkpoint += (_, _) => CheckpointCount++;
         }
     }
 }

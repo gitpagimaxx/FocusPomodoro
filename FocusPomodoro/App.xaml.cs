@@ -30,13 +30,18 @@ public partial class App : Application
         ToastNotificationPublisher.Register();
         Services.GetRequiredService<INotificationService>().Attach();
         Services.GetRequiredService<ISoundService>().Attach();
+        var history = Services.GetRequiredService<ISessionHistoryService>();
+        await history.InitializeAsync();
+        history.Attach();
 
         _window = Services.GetRequiredService<MainWindow>();
         _trayIcon = Services.GetRequiredService<ITrayIconService>();
-        _trayIcon.Initialize();
-        Services.GetRequiredService<MainViewModel>().RefreshTray();
         CoreApplication.Resuming += OnApplicationResuming;
         _window.Activate();
+        _trayIcon.Initialize();
+        var viewModel = Services.GetRequiredService<MainViewModel>();
+        viewModel.RefreshTray();
+        await viewModel.OfferResumeIfNeededAsync();
     }
 
     private static void OnApplicationResuming(object? sender, object e)
@@ -62,15 +67,18 @@ public partial class App : Application
         }
 
         var settingsPath = Path.Combine(localFolder, SettingsService.FileName);
+        var historyPath = Path.Combine(localFolder, SqliteHistoryStore.FileName);
 
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<PomodoroSettings>();
         services.AddSingleton<ISettingsService>(sp =>
             new SettingsService(sp.GetRequiredService<PomodoroSettings>(), settingsPath));
+        services.AddSingleton<IHistoryStore>(_ => new SqliteHistoryStore(historyPath));
         services.AddSingleton<IWindowService, WindowService>();
         services.AddSingleton<ITrayIconService, TrayIconService>();
         services.AddSingleton<IUiTicker, DispatcherQueueTicker>();
         services.AddSingleton<IPomodoroTimerService, PomodoroTimerService>();
+        services.AddSingleton<ISessionHistoryService, SessionHistoryService>();
         services.AddSingleton<INotificationService>(sp =>
             new NotificationService(
                 sp.GetRequiredService<IPomodoroTimerService>(),
@@ -85,6 +93,8 @@ public partial class App : Application
         services.AddSingleton<MainWindow>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<SettingsWindow>();
+        services.AddTransient<HistoryViewModel>();
+        services.AddTransient<HistoryPanelWindow>();
 
         return services.BuildServiceProvider();
     }
